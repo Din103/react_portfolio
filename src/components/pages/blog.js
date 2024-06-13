@@ -5,10 +5,11 @@ import axios from "axios";
 import BlogItem from "../blog/blog-item";
 import BlogModal from "../modals/blog-modal";
 
+// Componente de clase Blog que maneja el blog de la aplicación
 class Blog extends Component {
   constructor() {
     super();
-
+    // Estado inicial del componente
     this.state = {
       blogItems: [],
       totalCount: 0,
@@ -16,7 +17,7 @@ class Blog extends Component {
       isLoading: true,
       blogModalIsOpen: false
     };
-
+    // Enlazar métodos al contexto del componente
     this.getBlogItems = this.getBlogItems.bind(this);
     this.onScroll = this.onScroll.bind(this);
     window.addEventListener("scroll", this.onScroll, false);
@@ -27,7 +28,7 @@ class Blog extends Component {
     );
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
   }
-
+  // Maneja la eliminación de un blog
   handleDeleteClick(blog) {
     axios
       .delete(
@@ -35,38 +36,38 @@ class Blog extends Component {
         { withCredentials: true }
       )
       .then(response => {
+        // Filtra el blog eliminado del estado
         this.setState({
           blogItems: this.state.blogItems.filter(blogItem => {
             return blog.id !== blogItem.id;
           })
         });
-
         return response.data;
       })
       .catch(error => {
         console.log("delete blog error", error);
       });
   }
-
+  // Maneja la adición exitosa de un nuevo blog
   handleSuccessfulNewBlogSubmission(blog) {
     this.setState({
       blogModalIsOpen: false,
       blogItems: [blog].concat(this.state.blogItems)
     });
   }
-
+  // Maneja el cierre del modal
   handleModalClose() {
     this.setState({
       blogModalIsOpen: false
     });
   }
-
+  // Maneja la apertura del modal para un nuevo blog
   handleNewBlogClick() {
     this.setState({
       blogModalIsOpen: true
     });
   }
-
+  // Maneja el evento de scroll para carga infinita
   onScroll() {
     if (
       this.state.isLoading ||
@@ -74,7 +75,6 @@ class Blog extends Component {
     ) {
       return;
     }
-
     if (
       window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
@@ -82,12 +82,11 @@ class Blog extends Component {
       this.getBlogItems();
     }
   }
-
+  // Obtiene los ítems del blog de la API
   getBlogItems() {
     this.setState({
       currentPage: this.state.currentPage + 1
     });
-
     axios
       .get(
         `https://jordan.devcamp.space/portfolio/portfolio_blogs?page=${
@@ -109,16 +108,16 @@ class Blog extends Component {
         console.log("getBlogItems error", error);
       });
   }
-
+  // Ejecuta la obtención de blogs cuando el componente se monta
   componentWillMount() {
     this.getBlogItems();
   }
-
+  // Elimina el listener de scroll cuando el componente se desmonta
   componentWillUnmount() {
     window.removeEventListener("scroll", this.onScroll, false);
   }
-
   render() {
+    // Mapea los items del blog a componentes BlogItem
     const blogRecords = this.state.blogItems.map(blogItem => {
       if (this.props.loggedInStatus === "LOGGED_IN") {
         return (
@@ -143,7 +142,7 @@ class Blog extends Component {
           handleModalClose={this.handleModalClose}
           modalIsOpen={this.state.blogModalIsOpen}
         />
-
+        {/* Renderiza el enlace para agregar un nuevo blog si el usuario está logueado */}
         {this.props.loggedInStatus === "LOGGED_IN" ? (
           <div className="new-blog-link">
             <a onClick={this.handleNewBlogClick}>
@@ -151,9 +150,9 @@ class Blog extends Component {
             </a>
           </div>
         ) : null}
-
+        {/* Renderiza los registros del blog */}
         <div className="content-container">{blogRecords}</div>
-
+        {/* Muestra un loader mientras se cargan los blogs */}
         {this.state.isLoading ? (
           <div className="content-loader">
             <FontAwesomeIcon icon="spinner" spin />
