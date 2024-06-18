@@ -1,74 +1,95 @@
-//Este componente de clase ha sido modificado a componente funcional por chatgpt
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import axios from "axios";
 
 import PortfolioItem from "./portfolio-item";
 
-const PortfolioContainer = () => {
-  const [pageTitle, setPageTitle] = useState("Welcome to my portfolio");
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState([]);
+export default class PortfolioContainer extends Component {
+  constructor() {
+    super();
 
-  const handleFilter = (filter) => {
-    if (filter === "CLEAR_FILTERS") {
-      getPortfolioItems();
-    } else {
-      getPortfolioItems(filter);
-    }
-  };
+    this.state = {
+      pageTitle: "Welcome to my portfolio",
+      isLoading: false,
+      data: []
+    };
 
-  const getPortfolioItems = (filter = null) => {
-    axios
-      .get("https://jordan.devcamp.space/portfolio/portfolio_items")
-      .then((response) => {
-        if (filter) {
-          setData(
-            response.data.portfolio_items.filter((item) => {
-              return item.category === filter;
-            })
-          );
-        } else {
-          setData(response.data.portfolio_items);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const portfolioItems = () => {
-    return data.map((item) => {
-      return <PortfolioItem key={item.id} item={item} />;
-    });
-  };
-
-  useEffect(() => {
-    getPortfolioItems();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
+    this.handleFilter = this.handleFilter.bind(this);
   }
 
-  return (
-    <div className="homepage-wrapper">
-      <div className="filter-links">
-        <button className="btn" onClick={() => handleFilter("eCommerce")}>
-          eCommerce
-        </button>
-        <button className="btn" onClick={() => handleFilter("Scheduling")}>
-          Scheduling
-        </button>
-        <button className="btn" onClick={() => handleFilter("Enterprise")}>
-          Enterprise
-        </button>
-        <button className="btn" onClick={() => handleFilter("CLEAR_FILTERS")}>
-          All
-        </button>
-      </div>
-      <div className="portfolio-items-wrapper">{portfolioItems()}</div>
-    </div>
-  );
-};
+  handleFilter(filter) {
+    if (filter === "CLEAR_FILTERS") {
+      this.getPortfolioItems();
+    } else {
+      this.getPortfolioItems(filter);
+    }
+  }
 
-export default PortfolioContainer;
+  getPortfolioItems(filter = null) {
+    axios
+      .get("https://jordan.devcamp.space/portfolio/portfolio_items")
+      .then(response => {
+        if (filter) {
+          this.setState({
+            data: response.data.portfolio_items.filter(item => {
+              return item.category === filter;
+            })
+          });
+        } else {
+          this.setState({
+            data: response.data.portfolio_items
+          });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
+  portfolioItems() {
+    return this.state.data.map(item => {
+      return <PortfolioItem key={item.id} item={item} />;
+    });
+  }
+
+  componentDidMount() {
+    this.getPortfolioItems();
+  }
+
+  render() {
+    if (this.state.isLoading) {
+      return <div>Loading...</div>;
+    }
+
+    return (
+      <div className="homepage-wrapper">
+        <div className="filter-links">
+          <button
+            className="btn"
+            onClick={() => this.handleFilter("eCommerce")}
+          >
+            eCommerce
+          </button>
+          <button
+            className="btn"
+            onClick={() => this.handleFilter("Scheduling")}
+          >
+            Scheduling
+          </button>
+          <button
+            className="btn"
+            onClick={() => this.handleFilter("Enterprise")}
+          >
+            Enterprise
+          </button>
+          <button
+            className="btn"
+            onClick={() => this.handleFilter("CLEAR_FILTERS")}
+          >
+            All
+          </button>
+        </div>
+        <div className="portfolio-items-wrapper">{this.portfolioItems()}</div>
+      </div>
+    );
+  }
+}
